@@ -71,7 +71,12 @@ class SecondSpectrumDeserializer(
             ball_coordinates = None
             ball_speed = None
 
-        ball_state = BallState.ALIVE if frame_data["eventType"] != "stoppage" else BallState.DEAD
+        event_type = frame_data.get("eventType")
+        if event_type is None:
+            event_type = None
+            logger.warning("Missing 'eventType' key in frame_data")
+
+        ball_state = BallState.ALIVE if event_type != "stoppage" else BallState.DEAD
         ball_owning_team = (
             teams[0] if frame_data["lastTouch"] == "home" else teams[1]
         )

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import logging
 
 import pytest
 
@@ -455,3 +456,20 @@ class TestSecondSpectrumTracking:
         assert dataset.records[0].created_utc == 1234567890
         assert dataset.records[0].updated_utc == 1234567890
         assert dataset.records[0].deleted_utc == None
+
+    def test_missing_event_type_handling(
+        self, meta_data: Path, raw_data: Path, additional_meta_data: Path, caplog
+    ):
+        with caplog.at_level(logging.WARNING):
+            dataset = secondspectrum.load(
+                meta_data=meta_data,
+                raw_data=raw_data,
+                additional_meta_data=additional_meta_data,
+                only_alive=False,
+                coordinates="secondspectrum",
+            )
+
+            assert "Missing 'eventType' key in frame_data" in caplog.text
+
+            # Check that the default value of None is used for eventType
+            assert dataset.records[0].event_type is None
