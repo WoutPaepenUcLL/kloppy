@@ -71,7 +71,7 @@ class SecondSpectrumDeserializer(
             ball_coordinates = None
             ball_speed = None
 
-        ball_state = BallState.ALIVE if frame_data["live"] else BallState.DEAD
+        ball_state = BallState.ALIVE if frame_data["eventType"] != "stoppage" else BallState.DEAD
         ball_owning_team = (
             teams[0] if frame_data["lastTouch"] == "home" else teams[1]
         )
@@ -257,9 +257,6 @@ class SecondSpectrumDeserializer(
 
                     # Each line is just json so we just parse it
                     frame_data = json.loads(line_)
-
-                    if self.only_alive and not frame_data["live"]:
-                        continue
 
                     if n % sample == 0:
                         yield frame_data
